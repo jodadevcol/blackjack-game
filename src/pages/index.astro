@@ -2,14 +2,95 @@
 ---
 
 <html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>Astro</title>
+  </head>
+  <body class="blackjack bg-col-cambridge-blue">
+    <header class="bg-white px-4 py-5">
+      <div class="max-w-5xl mx-auto text-center">
+        <h1>BlackJack</h1>
+      </div>
+    </header>
+
+    <main id="content">
+      <section class="relative max-w-5xl h-full mx-auto p-2">
+        <article class="board-balckjack h-full gap-y-5">
+          <header>
+            <div>
+              <button
+                id="btn-new-game"
+                class="py-2 px-4 border border-white text-sm leading-tight"
+              >
+                Nuevo juego
+              </button>
+              <button
+                id="btn-request-card"
+                class="py-2 px-4 border border-white text-sm leading-tight"
+              >
+                Pedir carta
+              </button>
+              <button
+                id="btn-stop-game"
+                class="py-2 px-4 border border-white text-sm leading-tight"
+              >
+                Detener
+              </button>
+            </div>
+          </header>
+
+          <aside class="players flex flex-col gap-y-4">
+            <div class="player player--jugador" data-player="player">
+              <div class="">
+                <span>Jugador 1</span>
+                <span data-score>0</span>
+              </div>
+
+              <ul class="flex items-center">
+                <li class="">
+                  <figure class="max-w-[160px]">
+                    <img src="./cards/2C.png" alt="" />
+                  </figure>
+                </li>
+              </ul>
+            </div>
+
+            <div class="player player--cpu" data-player="cpu">
+              <div class="">
+                <span>CPU 1</span>
+                <span data-score>0</span>
+              </div>
+
+              <ul class="flex items-center">
+                <li class="">
+                  <figure class="max-w-[160px]">
+                    <img src="./cards/2C.png" alt="" />
+                  </figure>
+                </li>
+              </ul>
+            </div>
+          </aside>
+        </article>
+      </section>
+    </main>
+  </body>
 </html>
+
+<script src="../scripts/blackjack.js"></script>
+
+<style is:global>
+  .blackjack {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    min-height: 100vh;
+  }
+
+  .board-balckjack {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+</style>
