@@ -25,30 +25,122 @@ const CARD_VALUES = {
 
 const PLAYERS = {
   [LABEL_PLAYER]: {
+    name: 'Jugador 1',
     score: 0,
-    domScore: () => $({ selector: '[data-player="player"] [data-score]' })
+    domScore: () => $({ selector: '[data-player="player"] [data-score]' }),
+    domCards: () => $({ selector: '[data-player="player"] [data-cards]' }),
+    match: {
+      win: 0,
+      loss: 0,
+    }
   },
   [LABEL_CPU]: {
+    name: 'Computadora',
     score: 0,
-    domScore: () => $({ selector: '[data-player="cpu"] [data-score]' })
+    domScore: () => $({ selector: '[data-player="cpu"] [data-score]' }),
+    domCards: () => $({ selector: '[data-player="cpu"] [data-cards]' }),
+    match: {
+      win: 0,
+      loss: 0,
+    }
   }
+}
+
+const templateItemCard = ({ selectedCard }) => {
+  return (`
+    <li class="first-of-type:ml-0 -ml-20" >
+      <figure class="max-w-[160px]">
+        <img src="./cards/${selectedCard}.png" alt="Card with value ${selectedCard}" />
+      </figure>
+    </li>
+  `)
 }
 
 const BTN_NEW_GAME = $({ selector: '#btn-new-game' })
 const BTN_REQUEST_GAME = $({ selector: '#btn-request-card' })
 const BTN_STOP_GAME = $({ selector: '#btn-stop-game' })
 
-function shiftActions ({ turn }) {
+function actionsShift ({ turn }) {
   const selectedCard = requestCard()
-  const { score } = PLAYERS[turn]
+  const player = PLAYERS[turn]
+  const { score } = player
+
   const newScore = score + cardValue({ selectedCard })
-  updatedScore({ player: PLAYERS[turn], newScore })
+  updatedScore({ player, newScore })
+  addCardInBoard({ player, selectedCard })
+}
+
+function cpuShift ({ turn }) {
+  const player = PLAYERS[turn]
+  const { score: scorePlayer } = player
+
+  for (let index = 0; ; index++) {
+    const playerCPU = PLAYERS[LABEL_CPU]
+    const { score: scoreCPU } = PLAYERS[LABEL_CPU]
+
+    const selectedCard = requestCard()
+    if (!selectedCard) break
+
+    const valueCard = cardValue({ selectedCard })
+    const newScoreCPU = scoreCPU + valueCard
+
+    updatedScore({ player: playerCPU, newScore: newScoreCPU })
+
+    console.log(`CPU: ${playerCPU.score}`);
+
+    addCardInBoard({ player: playerCPU, selectedCard })
+
+    if (scorePlayer >= 21) break
+
+    if ((scoreCPU < scorePlayer) && (scorePlayer <= 21)) break
+  }
+}
+
+function gameValidations ({ turn }) {
+  const currentPlayer = PLAYERS[turn]
+  const { name, score, match } = currentPlayer
+
+  if (score >= 21) {
+    console.warn(`Has perdido ${name}`);
+    BTN_REQUEST_GAME.disabled = true
+
+    const newLoss = match.loss + 1
+    match.loss = newLoss
+
+    return newLoss
+  }
+
+  if (score === 21) {
+    console.warn(`Has echo 21 ${name}`);
+    BTN_REQUEST_GAME.disabled = true
+
+    const newWin = match.win + 1
+    match.win = newWin
+
+    return newWin
+  }
+
+  return false
 }
 
 function updatedScore ({ player, newScore }) {
   const newDOMScore = player?.domScore()
   newDOMScore.innerText = newScore
   player.score = newScore
+
+  // console.log(player);
+}
+
+function addCardInBoard ({ player, selectedCard }) {
+  const newTemplate = templateItemCard({ selectedCard })
+  const currentCards = player?.domCards()
+
+  if (currentCards === null) {
+    throw new Error('No fue posible encontrar donde renderizar la carta. Verifique que esten los siguientes selectores "[data-player="PLAYER_NAME"] [data-cards]"')
+    return
+  }
+
+  currentCards.insertAdjacentHTML('beforeend', newTemplate)
 }
 
 function createDeck () {
@@ -65,13 +157,14 @@ function createDeck () {
 
 function requestCard () {
   const currentDeck = BLACKJACK_OBJ.deck
-  if (currentDeck.length === 0) return
+  if (currentDeck.length === 0) return false
 
-  const firstCard = currentDeck.shift()
-  return firstCard
+  return currentDeck.shift()
 }
 
 function cardValue ({ selectedCard }) {
+  if (!selectedCard) return false
+
   const value = selectedCard.substring(0, selectedCard.length - 1)
   return CARD_VALUES[value]
 }
@@ -82,7 +175,17 @@ function cardValue ({ selectedCard }) {
 
 // Events
 BTN_REQUEST_GAME.addEventListener('click', () => {
-  shiftActions({ turn: LABEL_PLAYER })
+  actionsShift({ turn: LABEL_PLAYER })
+  const finishTurn = gameValidations({ turn: LABEL_PLAYER })
+
+  if (finishTurn) cpuShift({ turn: LABEL_PLAYER })
+})
+
+BTN_STOP_GAME.addEventListener('click', () => {
+  cpuShift({ turn: LABEL_PLAYER })
+
+  BTN_REQUEST_GAME.disabled = true
+  BTN_STOP_GAME.disabled = true
 })
 
 createDeck()

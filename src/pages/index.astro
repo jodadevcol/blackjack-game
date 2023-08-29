@@ -42,20 +42,14 @@
             </div>
           </header>
 
-          <aside class="players flex flex-col gap-y-4">
+          <aside class="players grid grid-rows-2 gap-y-4">
             <div class="player player--jugador" data-player="player">
               <div class="">
                 <span>Jugador 1</span>
                 <span data-score>0</span>
               </div>
 
-              <ul class="flex items-center">
-                <li class="">
-                  <figure class="max-w-[160px]">
-                    <img src="./cards/2C.png" alt="" />
-                  </figure>
-                </li>
-              </ul>
+              <ul class="flex items-center" data-cards></ul>
             </div>
 
             <div class="player player--cpu" data-player="cpu">
@@ -64,13 +58,7 @@
                 <span data-score>0</span>
               </div>
 
-              <ul class="flex items-center">
-                <li class="">
-                  <figure class="max-w-[160px]">
-                    <img src="./cards/2C.png" alt="" />
-                  </figure>
-                </li>
-              </ul>
+              <ul class="flex items-center" data-cards></ul>
             </div>
           </aside>
         </article>
