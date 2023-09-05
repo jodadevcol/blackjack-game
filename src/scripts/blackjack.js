@@ -70,37 +70,37 @@ function actionsShift ({ turn }) {
   addCardInBoard({ player, selectedCard })
 }
 
-function cpuShift ({ turn }) {
-  const player = PLAYERS[turn]
-  const { score: scorePlayer } = player
+function cpuShift ({ scoreCompare }) {
+  const playerCompare = PLAYERS[scoreCompare]
+  const { score: scoreCurrentCompare } = playerCompare
 
-  for (let index = 0; ; index++) {
-    const playerCPU = PLAYERS[LABEL_CPU]
-    const { score: scoreCPU } = PLAYERS[LABEL_CPU]
+  const playerCPU = PLAYERS[LABEL_CPU]
+  const { score: scoreCPU } = PLAYERS[LABEL_CPU]
 
-    const selectedCard = requestCard()
-    if (!selectedCard) break
+  const selectedCard = requestCard()
+  if (!selectedCard) return
 
-    const valueCard = cardValue({ selectedCard })
-    const newScoreCPU = scoreCPU + valueCard
+  const valueCard = cardValue({ selectedCard })
+  const newScoreCPU = scoreCPU + valueCard
 
-    updatedScore({ player: playerCPU, newScore: newScoreCPU })
+  if ((newScoreCPU >= scoreCurrentCompare)) return
 
-    console.log(`CPU: ${playerCPU.score}`);
+  updatedScore({ player: playerCPU, newScore: newScoreCPU })
+  addCardInBoard({ player: playerCPU, selectedCard })
 
-    addCardInBoard({ player: playerCPU, selectedCard })
+  /**
+   * ejecucion de una unica vez de cpu cuando jugador pierde
+  */
+  if (scoreCurrentCompare >= 21) return
 
-    if (scorePlayer >= 21) break
-
-    if ((scoreCPU < scorePlayer) && (scorePlayer <= 21)) break
-  }
+  cpuShift({ scoreCompare })
 }
 
 function gameValidations ({ turn }) {
   const currentPlayer = PLAYERS[turn]
   const { name, score, match } = currentPlayer
 
-  if (score >= 21) {
+  if (score > 21) {
     console.warn(`Has perdido ${name}`);
     BTN_REQUEST_GAME.disabled = true
 
@@ -178,11 +178,13 @@ BTN_REQUEST_GAME.addEventListener('click', () => {
   actionsShift({ turn: LABEL_PLAYER })
   const finishTurn = gameValidations({ turn: LABEL_PLAYER })
 
-  if (finishTurn) cpuShift({ turn: LABEL_PLAYER })
+  console.log(finishTurn);
+
+  if (finishTurn) cpuShift({ scoreCompare: LABEL_PLAYER, stopGame: true })
 })
 
 BTN_STOP_GAME.addEventListener('click', () => {
-  cpuShift({ turn: LABEL_PLAYER })
+  cpuShift({ scoreCompare: LABEL_PLAYER })
 
   BTN_REQUEST_GAME.disabled = true
   BTN_STOP_GAME.disabled = true
